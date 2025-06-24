@@ -1,14 +1,24 @@
-import React from "react";
-import { Text, View } from "react-native";
+import { useClerk } from "@clerk/clerk-expo";
+import * as Linking from "expo-linking";
+import { Text, TouchableOpacity } from "react-native";
 
-type Props = {};
+const SettingsScreen = () => {
+  const { signOut } = useClerk();
 
-const settings = (props: Props) => {
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      Linking.openURL(Linking.createURL("/"));
+      console.log("Signed out");
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    }
+  };
+
   return (
-    <View>
-      <Text>settings</Text>
-    </View>
+    <TouchableOpacity onPress={handleSignOut}>
+      <Text>Sign out</Text>
+    </TouchableOpacity>
   );
 };
-
-export default settings;
+export default SettingsScreen;

@@ -1,9 +1,12 @@
+import ModelSelector from "@/components/ui/ModelSelector";
+import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
+import axios from "axios";
 import { Link } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Dimensions,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -13,63 +16,123 @@ import {
   View,
 } from "react-native";
 
-const { width, height } = Dimensions.get("window");
+import OutputCard from "@/components/ui/OutputCard";
+import TagButton from "@/components/ui/TagButton";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import { Model, MODEL_TYPE, PERFORMANCE } from "../../interfaces/Model";
 
-interface TransformationType {
-  name: string;
-  color: string;
-  bgColor: string;
-}
+axios.defaults.baseURL = "http://192.168.1.111:4000/api/v1";
 
-interface ModelType {
-  name: string;
-  speed: string;
-  accuracy: string;
-}
-
-const TextTransformationScreen: React.FC = () => {
+const TextTransformationScreen: FC = () => {
   const [inputText, setInputText] = useState<string>("");
-  const [selectedTransformation, setSelectedTransformation] =
-    useState<string>("Gen Z");
-  const [transformedText, setTransformedText] = useState<string>(
-    "Yo, frfr, that's cap. No kizzy, it's bussin'."
-  );
-  const [isTransforming, setIsTransforming] = useState<boolean>(false);
-  const [selectedModel, setSelectedModel] = useState<string>("GPT-4");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  // Animation values
+  const [transformedText, setTransformedText] = useState<string>("");
+
+  const [selectedModel, setSelectedModel] = useState<Partial<Model>>({
+    name: "gemini-2.0-flash-lite",
+    performance: PERFORMANCE.GOOD,
+    type: MODEL_TYPE.GEMINI,
+    accuracy: 64,
+    pro: false,
+    speed: 1.8,
+  });
+  const [token, setToken] = useState<string | null>(null);
+
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    (async () => {
+      const t = await getToken();
+      setToken(t);
+    })();
+  }, [getToken]);
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const transformProgress = useRef(new Animated.Value(0)).current;
+  const [seeMore, setSeeMore] = useState<boolean>(false);
+  const transformationMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axios.post(
+        "/transform",
+        {
+          content: inputText,
+          tags: selectedTags,
+          model: selectedModel.name,
+          type: selectedModel.type,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    },
+    mutationKey: ["transform"],
+    onSuccess: (data) => {
+      setTransformedText(data.transformedText);
+    },
+    onError: (err: any) => {
+      console.log("Full error object:", JSON.stringify(err, null, 2));
+    },
+  });
+  const {
+    data: tags,
+    isLoading: tagsLoading,
+    isError: tagsIsError,
+    error: tagsError,
+  } = useQuery({
+    queryKey: ["tags"],
+    queryFn: async () => {
+      const response = await axios.get("/user/tags", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    },
+    enabled: !!token,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+  });
 
-  const transformationTypes: TransformationType[] = [
-    {
-      name: "Pro",
-      color: "text-transformation-pro-text",
-      bgColor: "bg-transformation-pro-bg",
-    },
-    {
-      name: "Savage",
-      color: "text-transformation-savage-text",
-      bgColor: "bg-transformation-savage-bg",
-    },
-    {
-      name: "Gen Z",
-      color: "text-transformation-genz-text",
-      bgColor: "bg-transformation-genz-bg",
-    },
-    {
-      name: "Insult",
-      color: "text-transformation-insult-text",
-      bgColor: "bg-transformation-insult-bg",
-    },
-  ];
+  const {
+    data,
+    error: modelsError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
 
-  const models: ModelType[] = [
-    { name: "GPT-4", speed: "2.3s", accuracy: "98%" },
-    { name: "Claude-3", speed: "1.8s", accuracy: "96%" },
-    { name: "Gemini Pro", speed: "1.2s", accuracy: "94%" },
-  ];
+    isLoading: modelsLoading,
+  } = useInfiniteQuery({
+    queryKey: ["models"],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await axios.get(`/ai-model/all?page=${pageParam}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: Model[], allPages) => {
+      return lastPage.length > 0 ? allPages.length + 1 : undefined;
+    },
+    enabled: !!token,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+  });
+
+  const models = data?.pages.flat() || [];
+
+  //console.log(JSON.stringify(modelsError, null, 2));
+  console.log(JSON.stringify(tagsError, null, 3));
+  console.log(tags);
 
   useEffect(() => {
     Animated.parallel([
@@ -89,119 +152,14 @@ const TextTransformationScreen: React.FC = () => {
   const handleTransform = (): void => {
     if (!inputText.trim()) return;
 
-    setIsTransforming(true);
+    transformationMutation.mutate();
 
-    // Progress animation
     Animated.timing(transformProgress, {
       toValue: 1,
       duration: 2000,
       useNativeDriver: false,
     }).start();
-
-    setTimeout(() => {
-      const transformations: Record<string, string> = {
-        Professional:
-          "I respectfully disagree with your assessment and would appreciate the opportunity to discuss alternative perspectives.",
-        Savage:
-          "That's completely ridiculous and you know it. Come back when you have something worth discussing.",
-        "Gen Z":
-          "Bruh that's straight cap, no cap. This ain't it chief, periodt.",
-        Insult:
-          "Your opinion has the intellectual depth of a puddle and the charm of wet cardboard.",
-      };
-
-      setTransformedText(transformations[selectedTransformation]);
-      setIsTransforming(false);
-      transformProgress.setValue(0);
-    }, 2000);
   };
-
-  interface TransformationButtonProps {
-    type: string;
-    isSelected: boolean;
-    onPress: (type: string) => void;
-  }
-
-  const TransformationButton: React.FC<TransformationButtonProps> = ({
-    type,
-    isSelected,
-    onPress,
-  }) => {
-    return (
-      <TouchableOpacity
-        onPress={() => onPress(type)}
-        className={`flex-1 mx-1 p-4 rounded-2xl border-2 ${
-          isSelected
-            ? "border-primary-dark bg-primary-dark"
-            : "border-border-light bg-background-DEFAULT"
-        }`}
-        style={{
-          shadowColor: isSelected ? "#000" : "transparent",
-          shadowOffset: { width: 0, height: isSelected ? 8 : 0 },
-          shadowOpacity: isSelected ? 0.1 : 0,
-          shadowRadius: isSelected ? 16 : 0,
-          elevation: isSelected ? 4 : 0,
-        }}
-      >
-        <Text
-          className={`text-center font-bold text-sm ${
-            isSelected ? "text-text-white" : "text-text-secondary"
-          }`}
-        >
-          {type}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
-
-  interface ModelSelectorProps {
-    model: ModelType;
-    isSelected: boolean;
-    onPress: (modelName: string) => void;
-  }
-
-  const ModelSelector: React.FC<ModelSelectorProps> = ({
-    model,
-    isSelected,
-    onPress,
-  }) => (
-    <TouchableOpacity
-      onPress={() => onPress(model.name)}
-      className={`p-4 rounded-xl mb-3 border ${
-        isSelected
-          ? "border-primary-dark bg-background-secondary"
-          : "border-border-light bg-background-DEFAULT"
-      }`}
-    >
-      <View className="flex-row items-center justify-between">
-        <View className="flex-1">
-          <Text
-            className={`font-bold text-base mb-1 ${
-              isSelected ? "text-text-primary" : "text-text-primary"
-            }`}
-          >
-            {model.name}
-          </Text>
-          <View className="flex-row gap-2 items-center space-x-4">
-            <Text className="text-xs text-text-tertiary">
-              Speed: {model.speed}
-            </Text>
-            <Text className="text-text-tertiary">•</Text>
-            <Text className="text-xs text-text-tertiary">
-              Accuracy: {model.accuracy}
-            </Text>
-          </View>
-        </View>
-        <Link href="/(auth)/auth">Hello</Link>
-
-        <View
-          className={`w-3 h-3 rounded-full ${
-            isSelected ? "bg-primary-dark" : "bg-border-dark"
-          }`}
-        />
-      </View>
-    </TouchableOpacity>
-  );
 
   const progressWidth = transformProgress.interpolate({
     inputRange: [0, 1],
@@ -269,16 +227,68 @@ const TextTransformationScreen: React.FC = () => {
           <Text className="text-lg font-bold text-text-primary mb-4">
             Style
           </Text>
-          <View className="flex-row">
-            {transformationTypes.map((type) => (
-              <TransformationButton
-                key={type.name}
-                type={type.name}
-                isSelected={selectedTransformation === type.name}
-                onPress={setSelectedTransformation}
-              />
-            ))}
-          </View>
+          <ScrollView
+            horizontal
+            className="flex-row gap-2"
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+          >
+            {tagsLoading ? (
+              <View className="flex-row gap-2">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <View
+                    key={index}
+                    className="h-14 mb-3 w-28 bg-gray-200 rounded-2xl"
+                  />
+                ))}
+              </View>
+            ) : tagsIsError ? (
+              <Text className="text-red-500">{tagsError?.message}</Text>
+            ) : (
+              <>
+                {tags?.default_tags.map((tag: string, index: number) => (
+                  <TagButton
+                    key={tag + index}
+                    tag={tag}
+                    isSelected={selectedTags.includes(tag)}
+                    onPress={() =>
+                      setSelectedTags((pre) => {
+                        if (pre.includes(tag)) {
+                          return pre.filter((val) => val !== tag);
+                        } else {
+                          return [...pre, tag];
+                        }
+                      })
+                    }
+                  />
+                ))}
+                {tags?.custom_tags.map(
+                  (
+                    tag: {
+                      name: string;
+                      prompt: string;
+                    },
+                    index: number
+                  ) => (
+                    <TagButton
+                      key={tag.name + index}
+                      tag={tag.name}
+                      isSelected={selectedTags.includes(tag.name)}
+                      onPress={() =>
+                        setSelectedTags((pre) => {
+                          if (pre.includes(tag.name)) {
+                            return pre.filter((val) => val !== tag.name);
+                          } else {
+                            return [...pre, tag.name];
+                          }
+                        })
+                      }
+                    />
+                  )
+                )}
+              </>
+            )}
+          </ScrollView>
         </Animated.View>
 
         {/* Model Selection */}
@@ -292,14 +302,70 @@ const TextTransformationScreen: React.FC = () => {
           <Text className="text-lg font-bold text-text-primary mb-4">
             AI Model
           </Text>
-          {models.map((model) => (
-            <ModelSelector
-              key={model.name}
-              model={model}
-              isSelected={selectedModel === model.name}
-              onPress={setSelectedModel}
-            />
-          ))}
+
+          {modelsLoading
+            ? Array.from({ length: 3 }).map((_, index) => (
+                <View
+                  key={index}
+                  className="h-20 mb-3  bg-gray-200 rounded-2xl"
+                ></View>
+              ))
+            : models
+                ?.slice(0, seeMore ? models.length : 5)
+                .map((model: Model) => (
+                  <ModelSelector
+                    key={model.name}
+                    model={model}
+                    isSelected={selectedModel.name === model.name}
+                    onPress={() => setSelectedModel(model)}
+                  />
+                ))}
+
+          {isFetchingNextPage ? (
+            <TouchableOpacity className=" gap-1 pt-2 flex-row justify-center items-center">
+              <Text className="text-text-primary font-bold">Loading...</Text>
+            </TouchableOpacity>
+          ) : (
+            !modelsLoading && (
+              <View className="flex-row justify-center items-center gap-4 mt-4">
+                <TouchableOpacity
+                  onPress={() => {
+                    fetchNextPage();
+                    setSeeMore(true);
+                  }}
+                  disabled={isFetchingNextPage}
+                  className="flex-row items-center justify-center gap-2"
+                >
+                  <Text className="text-text-primary font-bold">
+                    {isFetchingNextPage ? "Loading..." : "See More"}
+                  </Text>
+                  <Feather
+                    name="arrow-right"
+                    className=" mt-[2px] "
+                    size={18}
+                    color="#374151"
+                  />
+                </TouchableOpacity>
+
+                {models && seeMore === true && (
+                  <TouchableOpacity
+                    onPress={() => setSeeMore(false)}
+                    className="flex-row items-center justify-center gap-2"
+                  >
+                    <Text className="text-text-primary font-bold">
+                      Collapse
+                    </Text>
+                    <Feather
+                      name="arrow-up"
+                      className=" mt-[2px] "
+                      size={18}
+                      color="#374151"
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+            )
+          )}
         </Animated.View>
 
         {/* Transform Button */}
@@ -312,22 +378,24 @@ const TextTransformationScreen: React.FC = () => {
         >
           <TouchableOpacity
             onPress={handleTransform}
-            disabled={isTransforming || !inputText.trim()}
+            disabled={transformationMutation.isPending || !inputText.trim()}
             className={`rounded-2xl py-4 ${
-              isTransforming || !inputText.trim()
+              transformationMutation.isPending || !inputText.trim()
                 ? "bg-gray-200"
                 : "bg-primary-dark"
             }`}
             style={{
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: isTransforming || !inputText.trim() ? 0 : 0.1,
+              shadowOpacity:
+                transformationMutation.isPending || !inputText.trim() ? 0 : 0.1,
               shadowRadius: 8,
-              elevation: isTransforming || !inputText.trim() ? 0 : 4,
+              elevation:
+                transformationMutation.isPending || !inputText.trim() ? 0 : 4,
             }}
           >
             <View className="flex-row items-center justify-center">
-              {isTransforming && (
+              {transformationMutation.isPending && (
                 <Animated.View
                   style={{
                     transform: [
@@ -346,16 +414,18 @@ const TextTransformationScreen: React.FC = () => {
               )}
               <Text
                 className={`font-bold text-base ${
-                  isTransforming || !inputText.trim()
+                  transformationMutation.isPending || !inputText.trim()
                     ? "text-text-tertiary"
                     : "text-text-white"
                 }`}
               >
-                {isTransforming ? "Transforming..." : "Transform Text"}
+                {transformationMutation.isPending
+                  ? "Transforming..."
+                  : "Transform Text"}
               </Text>
             </View>
 
-            {isTransforming && (
+            {transformationMutation.isPending && (
               <View className="mt-3 mx-8">
                 <View className="h-1 bg-border-dark rounded-full overflow-hidden">
                   <Animated.View
@@ -374,28 +444,20 @@ const TextTransformationScreen: React.FC = () => {
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }],
           }}
-          className="mx-6 mb-8"
+          className="mx-6  mb-8"
         >
           <Text className="text-lg font-bold text-text-primary mb-4">
             Output
           </Text>
-          <View className="bg-primary-dark rounded-2xl p-6">
-            <Text className="text-text-white text-base leading-6">
-              {transformedText}
-            </Text>
-            <View className="flex-row items-center justify-between mt-4 pt-4 border-t border-border-darkest">
-              <Text className="text-border-dark text-xs">
-                {selectedTransformation} • {selectedModel}
-              </Text>
-              <TouchableOpacity className="flex-row items-center">
-                <Ionicons name="copy-outline" size={16} color="#9ca3af" />
-                <Text className="text-border-dark text-xs ml-1">Copy</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+
+          <OutputCard
+            transformedText={transformedText}
+            selectedTags={selectedTags}
+            selectedModel={selectedModel}
+          />
         </Animated.View>
 
-        <View className="h-20" />
+        <Link href="/(auth)/auth">Hello</Link>
       </ScrollView>
     </SafeAreaView>
   );

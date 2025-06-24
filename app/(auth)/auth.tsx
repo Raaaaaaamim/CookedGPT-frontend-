@@ -1,7 +1,7 @@
-import { useSSO } from "@clerk/clerk-expo";
+import { useSSO, useUser } from "@clerk/clerk-expo";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
+
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
@@ -12,13 +12,22 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 const SignInScreen: React.FC = () => {
+  const { user, isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
-  const [fontsLoaded, fontError] = useFonts({
-    Popins_Regular: require("../../assets/fonts/Poppins-Regular.ttf"),
-  });
+
+  // Handle redirect in useEffect, not during render
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.replace("/(tabs)");
+    }
+  }, [isLoaded, isSignedIn, router]);
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -39,23 +48,41 @@ const SignInScreen: React.FC = () => {
     ]).start();
   }, []);
 
-  const router = useRouter();
   const { startSSOFlow } = useSSO();
 
   const handleGoogleSignIn = async () => {
-    console.log("handleGoogleSignIn");
     try {
       const { setActive, createdSessionId } = await startSSOFlow({
         strategy: "oauth_google",
       });
+
       if (setActive && createdSessionId) {
-        setActive({ session: createdSessionId });
-        router.replace("/(tabs)");
+        await setActive({ session: createdSessionId });
+        // Don't manually redirect here, let the useEffect handle it
+        // router.replace("/(tabs)");
       }
     } catch (error) {
-      console.log(error);
+      console.log("Google Sign In Error:", error);
     }
   };
+
+  // Show loading state while Clerk is initializing
+  if (!isLoaded) {
+    return (
+      <SafeAreaView className="flex-1 bg-background-DEFAULT justify-center items-center">
+        <Text className="text-text-secondary">Loading...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  // Don't render the sign-in form if user is already signed in
+  if (isSignedIn) {
+    return (
+      <SafeAreaView className="flex-1 bg-background-DEFAULT justify-center items-center">
+        <Text className="text-text-secondary">Redirecting...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background-DEFAULT">
@@ -77,12 +104,12 @@ const SignInScreen: React.FC = () => {
              flex-row gap-1 justify-center items-center "
             >
               <Image
-                className="w-10 h-16 "
+                className="w-10  h-16 "
                 source={require("../../assets/images/cookedgpt.png")}
               />
               <Text
                 style={{ fontFamily: "Popins_Regular" }}
-                className="text-text-secondary  text-xl font-bold  "
+                className="text-text-secondary   text-xl font-bold  "
               >
                 CookedGPT
               </Text>
