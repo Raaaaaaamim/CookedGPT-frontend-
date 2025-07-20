@@ -1,9 +1,12 @@
 import ModelSelector from "@/components/ui/ModelSelector";
+import OutputCard from "@/components/ui/OutputCard";
+import TagButton from "@/components/ui/TagButton";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import React, { FC, useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -15,19 +18,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-import OutputCard from "@/components/ui/OutputCard";
-import TagButton from "@/components/ui/TagButton";
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import Toast from "react-native-toast-message";
 import { Model, MODEL_TYPE, PERFORMANCE } from "../../interfaces/Model";
 
 axios.defaults.baseURL = "http://192.168.1.111:4000/api/v1";
 
 const TextTransformationScreen: FC = () => {
   const [inputText, setInputText] = useState<string>("");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  const [transformedText, setTransformedText] = useState<string>("");
+  const [selectedTags, setSelectedTags] = useState<string[]>(["SAVAGE"]);
 
   const [selectedModel, setSelectedModel] = useState<Partial<Model>>({
     name: "gemini-2.0-flash-lite",
@@ -39,7 +37,13 @@ const TextTransformationScreen: FC = () => {
   });
   const [token, setToken] = useState<string | null>(null);
 
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
+
+  useEffect(() => {
+    if (!userId) {
+      router.replace("/(auth)/auth");
+    }
+  }, [userId]);
 
   useEffect(() => {
     (async () => {
@@ -61,6 +65,7 @@ const TextTransformationScreen: FC = () => {
           tags: selectedTags,
           model: selectedModel.name,
           type: selectedModel.type,
+          modelId: selectedModel.id,
         },
         {
           headers: {
@@ -72,13 +77,17 @@ const TextTransformationScreen: FC = () => {
       return response.data;
     },
     mutationKey: ["transform"],
-    onSuccess: (data) => {
-      setTransformedText(data.transformedText);
-    },
+
     onError: (err: any) => {
       console.log("Full error object:", JSON.stringify(err, null, 2));
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: err.response.data.message,
+      });
     },
   });
+
   const {
     data: tags,
     isLoading: tagsLoading,
@@ -95,6 +104,7 @@ const TextTransformationScreen: FC = () => {
       });
       return response.data;
     },
+
     enabled: !!token,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
@@ -132,7 +142,7 @@ const TextTransformationScreen: FC = () => {
 
   //console.log(JSON.stringify(modelsError, null, 2));
   console.log(JSON.stringify(tagsError, null, 3));
-  console.log(tags);
+  console.log(tags, models);
 
   useEffect(() => {
     Animated.parallel([
@@ -314,9 +324,9 @@ const TextTransformationScreen: FC = () => {
                 ?.slice(0, seeMore ? models.length : 5)
                 .map((model: Model) => (
                   <ModelSelector
-                    key={model.name}
+                    key={model.id}
                     model={model}
-                    isSelected={selectedModel.name === model.name}
+                    isSelected={selectedModel.id === model.id}
                     onPress={() => setSelectedModel(model)}
                   />
                 ))}
@@ -449,12 +459,14 @@ const TextTransformationScreen: FC = () => {
           <Text className="text-lg font-bold text-text-primary mb-4">
             Output
           </Text>
-
-          <OutputCard
-            transformedText={transformedText}
-            selectedTags={selectedTags}
-            selectedModel={selectedModel}
-          />
+          {transformationMutation.data ? (
+            <OutputCard transformation={transformationMutation.data} />
+          ) : (
+            <OutputCard
+              transformation={null}
+              isPending={transformationMutation.isPending}
+            />
+          )}
         </Animated.View>
 
         <Link href="/(auth)/auth">Hello</Link>

@@ -1,22 +1,17 @@
-import { Model } from "@/interfaces/Model";
+import { Transformation } from "@/interfaces/Transformation";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
-  transformedText: string;
-  selectedTags: string[];
-  selectedModel: Partial<Model>;
+  transformation: Transformation | null;
+  isPending?: boolean;
 };
 
-const OutputCard = ({
-  transformedText,
-  selectedTags,
-  selectedModel,
-}: Props) => {
-  const isEmpty = !transformedText?.trim();
+const OutputCard = ({ transformation, isPending }: Props) => {
+  const isEmpty = !transformation?.content?.trim();
 
-  if (isEmpty) {
+  if (isEmpty || !transformation) {
     return (
       <View className="bg-gray-900 border border-gray-800 rounded-xl p-8 items-center justify-center min-h-[120px]">
         <View className="w-12 h-12 bg-gray-800 rounded-full items-center justify-center mb-3">
@@ -39,14 +34,14 @@ const OutputCard = ({
       {/* Content */}
       <View className="pr-8 mb-4">
         <Text className="text-white text-base leading-6">
-          {transformedText}
+          {transformation.content}
         </Text>
       </View>
 
       {/* Footer */}
       <View className="flex-row items-center justify-between pt-3 border-t border-gray-800">
         <Text className="text-gray-400 text-xs flex-1 mr-4" numberOfLines={1}>
-          {selectedTags[0]} • {selectedModel.name}
+          {transformation.tags[0]} • {transformation.modelName}
         </Text>
 
         <TouchableOpacity

@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function TabsLayout(): React.JSX.Element {
   return (
@@ -77,6 +78,7 @@ export default function TabsLayout(): React.JSX.Element {
           }}
         />
       </Tabs>
+      <Toast />
     </SafeAreaView>
   );
 }

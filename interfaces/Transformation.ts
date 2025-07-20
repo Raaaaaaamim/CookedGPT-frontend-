@@ -3,12 +3,12 @@ export interface TagButtonProps {
   isSelected: boolean;
   onPress: (type: string) => void;
 }
-export interface TransformationType {
-  name: string;
-}
+
 export interface Transformation {
   id: string;
   authorId: string;
+  modelName: string;
+  input: string;
   author: string;
   content: string;
   createdAt: Date;
