@@ -1,8 +1,8 @@
-import RenderTransformations from "@/components/layout/RenderTransformations";
-import FilterButton from "@/components/ui/FillterButton";
+import RenderTransformations from "@/components/others/RenderTransformations";
+import TagButton from "@/components/ui/TagButton";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -17,11 +17,38 @@ import {
 
 const HistoryScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedFilter, setSelectedFilter] = useState<string>("All");
+  const [selectedTag, setSelectedTag] = useState<string>("ALL");
 
-  const filters = ["All", "Pro", "Savage", "Gen Z", "Insult"];
+  const [token, setToken] = useState<string | null>(null);
 
   const { getToken } = useAuth();
+  useEffect(() => {
+    (async () => {
+      const t = await getToken();
+      setToken(t);
+    })();
+  }, [getToken]);
+  const {
+    data: tags,
+    isLoading: tagsLoading,
+    isError: tagsIsError,
+    error: tagsError,
+  } = useQuery({
+    queryKey: ["tags"],
+    queryFn: async () => {
+      const response = await axios.get("/user/tags", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    },
+
+    enabled: !!token,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+  });
 
   const {
     data: searchedData,
@@ -34,7 +61,6 @@ const HistoryScreen: React.FC = () => {
   } = useInfiniteQuery({
     queryKey: ["transformations", searchQuery],
     queryFn: async ({ pageParam = 1 }) => {
-      const token = await getToken();
       const response = await axios.get(
         `/user/transformations/search/for?keyword=${searchQuery}&page=${pageParam}`,
 
@@ -53,8 +79,6 @@ const HistoryScreen: React.FC = () => {
     },
     enabled: searchQuery.length > 0,
   });
-  console.log(searchedData, "searchedData");
-  console.log(JSON.stringify(searchedDataError, null, 2));
 
   const {
     data,
@@ -65,16 +89,16 @@ const HistoryScreen: React.FC = () => {
     error,
     isLoading,
   } = useInfiniteQuery({
-    queryKey: ["transformations", selectedFilter],
+    queryKey: ["transformations", selectedTag],
     queryFn: async ({ pageParam = 1 }) => {
-      const token = await getToken();
+      const t = await getToken();
       const response = await axios.get(
-        `/user/transformations/${selectedFilter
+        `/user/transformations/${selectedTag
           .toUpperCase()
           .trim()}?page=${pageParam}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${t}`,
             "Content-Type": "application/json",
           },
         }
@@ -88,12 +112,11 @@ const HistoryScreen: React.FC = () => {
     enabled: true,
   });
 
-  // console.log(JSON.stringify(data, null, 2));
-  // console.log(JSON.stringify(error, null, 2));
+  console.log(JSON.stringify(error, null, 2));
 
   useEffect(() => {
     refetch();
-  }, [selectedFilter, refetch]);
+  }, [selectedTag, refetch]);
 
   const allItems = useMemo(
     () => data?.pages.flatMap((page) => page.transformations) ?? [],
@@ -101,11 +124,11 @@ const HistoryScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background-DEFAULT">
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="white" />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between p-6 bg-background-DEFAULT">
+      <View className="flex-row items-center justify-between p-6 bg-white">
         <TouchableOpacity
           activeOpacity={0.7}
           className="w-10 h-10 rounded-full bg-background-secondary items-center justify-center"
@@ -145,10 +168,10 @@ const HistoryScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Filter Section */}
+      {/* Tag Section */}
       <View className="mb-6">
         <Text className="text-lg font-bold text-text-primary mb-4 mx-6">
-          Filter by Style
+          Tag by Style
         </Text>
         <ScrollView
           horizontal
@@ -156,20 +179,67 @@ const HistoryScreen: React.FC = () => {
           className="px-6"
           contentContainerStyle={{ paddingRight: 24 }}
         >
-          {filters.map((filter) => (
-            <FilterButton
-              key={filter}
-              filter={filter}
-              isSelected={selectedFilter === filter}
-              onPress={setSelectedFilter}
-            />
-          ))}
+          <ScrollView
+            horizontal
+            className="flex-row gap-2"
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+          >
+            {tagsLoading ? (
+              <View className="flex-row gap-2">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <View
+                    key={index}
+                    className="h-12 mb-3 w-20 bg-gray-200 rounded-2xl"
+                  />
+                ))}
+              </View>
+            ) : tagsIsError ? (
+              <Text className="text-red-500">{tagsError?.message}</Text>
+            ) : (
+              <>
+                {["ALL", ...tags?.default_tags].map(
+                  (tag: string, index: number) => (
+                    <TagButton
+                      key={tag + index}
+                      tag={tag}
+                      size="small"
+                      isSelected={selectedTag === tag}
+                      onPress={() => setSelectedTag(tag)}
+                    />
+                  )
+                )}
+                {tags?.custom_tags.map(
+                  (
+                    tag: {
+                      name: string;
+                      prompt: string;
+                    },
+                    index: number
+                  ) => (
+                    <TagButton
+                      key={tag.name + index}
+                      tag={tag.name}
+                      size="small"
+                      isSelected={selectedTag === tag.name}
+                      onPress={() => setSelectedTag(tag.name)}
+                    />
+                  )
+                )}
+              </>
+            )}
+          </ScrollView>
         </ScrollView>
       </View>
 
       {/* Results Count */}
       <View className="mx-6 mb-4">
-        <Text className="text-sm text-text-tertiary">66 found</Text>
+        <Text className="text-sm text-text-tertiary">
+          {searchQuery
+            ? searchedData?.pages[0].totalTransformations
+            : data?.pages[0].foundTransformations}{" "}
+          {searchQuery ? "found" : "total"}
+        </Text>
       </View>
 
       {searchQuery ? (
@@ -182,6 +252,7 @@ const HistoryScreen: React.FC = () => {
           hasNextPage={searchedDataHasNextPage}
           fetchNextPage={searchedDataFetchNextPage}
           searchQuery={searchQuery}
+          selectedTag={selectedTag}
         />
       ) : (
         <RenderTransformations
@@ -190,7 +261,7 @@ const HistoryScreen: React.FC = () => {
           allItems={allItems}
           hasNextPage={hasNextPage}
           fetchNextPage={fetchNextPage}
-          selectedFilter={selectedFilter}
+          selectedTag={selectedTag}
         />
       )}
     </SafeAreaView>

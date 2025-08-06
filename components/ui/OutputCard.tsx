@@ -40,12 +40,15 @@ const OutputCard = ({ transformation, isPending }: Props) => {
 
       {/* Footer */}
       <View className="flex-row items-center justify-between pt-3 border-t border-gray-800">
-        <Text className="text-gray-400 text-xs flex-1 mr-4" numberOfLines={1}>
+        <Text
+          className="text-gray-400 text-xs w-32 mr-2  flex-1 "
+          numberOfLines={1}
+        >
           {transformation.tags[0]} • {transformation.modelName}
         </Text>
 
         <TouchableOpacity
-          className="flex-row items-center space-x-1 px-3 py-1.5 rounded-lg bg-gray-800 active:bg-gray-700"
+          className="flex-row items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-800 active:bg-gray-700"
           activeOpacity={0.8}
         >
           <Ionicons name="copy-outline" size={14} color="#e5e7eb" />

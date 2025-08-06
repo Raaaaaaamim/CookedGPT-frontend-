@@ -10,7 +10,7 @@ const RenderTransformations = ({
   hasNextPage,
   fetchNextPage,
   searchQuery,
-  selectedFilter,
+  selectedTag,
 }: RenderTransformationsProps) => {
   if (isLoading && !isFetchingNextPage) {
     return (
@@ -44,12 +44,12 @@ const RenderTransformations = ({
             <Ionicons name="document-text-outline" size={32} color="#9ca3af" />
           </View>
           <Text className="text-text-primary text-lg font-bold mb-2 text-center">
-            {searchQuery || selectedFilter !== "All"
+            {searchQuery || selectedTag !== "All"
               ? "No matches found"
               : "No history yet"}
           </Text>
           <Text className="text-text-tertiary text-sm text-center max-w-64">
-            {searchQuery || selectedFilter !== "All"
+            {searchQuery || selectedTag !== "All"
               ? "Try adjusting your search or filter to find what you're looking for"
               : "Start transforming text to see your history appear here"}
           </Text>

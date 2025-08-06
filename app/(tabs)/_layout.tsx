@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 
 export default function TabsLayout(): React.JSX.Element {
   return (
@@ -77,8 +76,20 @@ export default function TabsLayout(): React.JSX.Element {
             ),
           }}
         />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons
+                name={focused ? "person" : "person-outline"}
+                size={focused ? 26 : 24}
+                color={color}
+              />
+            ),
+          }}
+        />
       </Tabs>
-      <Toast />
     </SafeAreaView>
   );
 }

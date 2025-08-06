@@ -18,7 +18,6 @@ const ModelSelectionModal: FC<Props> = ({
   loadMore,
   hasMore,
 }) => {
-  console.log("Modal models:", models);
   return (
     <Modal
       animationType="slide"
@@ -34,7 +33,6 @@ const ModelSelectionModal: FC<Props> = ({
               data={models}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => {
-                console.log("Rendering model:", item.name);
                 return (
                   <TouchableOpacity
                     onPress={() => onSelectModel(item)}

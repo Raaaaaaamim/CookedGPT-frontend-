@@ -1,9 +1,9 @@
 import { Transformation } from "./Transformation";
 
-export interface FilterButtonProps {
-  filter: string;
+export interface TagButtonProps {
+  tag: string;
   isSelected: boolean;
-  onPress: (filter: string) => void;
+  onPress: (tag: string) => void;
 }
 export interface HistoryItemProps {
   item: Transformation;

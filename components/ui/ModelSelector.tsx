@@ -43,7 +43,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({
         </View>
       </View>
       <View>
-        {model.type === "OPENAI" && <OpenAI width={24} height={24} />}
+        {model.type === "OPENAI" && <OpenAI width={28} height={28} />}
         {model.type === "GEMINI" && <Gemini width={22} height={22} />}
         {model.type === "OPENROUTER" && <OpenRouter width={18} height={18} />}
       </View>

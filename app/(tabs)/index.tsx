@@ -1,15 +1,16 @@
 import ModelSelector from "@/components/ui/ModelSelector";
 import OutputCard from "@/components/ui/OutputCard";
 import TagButton from "@/components/ui/TagButton";
-import { useAuth } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import React, { FC, useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -38,6 +39,7 @@ const TextTransformationScreen: FC = () => {
   const [token, setToken] = useState<string | null>(null);
 
   const { getToken, userId } = useAuth();
+  const { user } = useUser();
 
   useEffect(() => {
     if (!userId) {
@@ -82,11 +84,11 @@ const TextTransformationScreen: FC = () => {
       console.log("Full error object:", JSON.stringify(err, null, 2));
       Toast.show({
         type: "error",
-        text1: "Something went wrong",
-        text2: err.response.data.message,
+        text1: err.response.data.error,
       });
     },
   });
+  console.log(JSON.stringify(transformationMutation.error, null, 2));
 
   const {
     data: tags,
@@ -142,7 +144,6 @@ const TextTransformationScreen: FC = () => {
 
   //console.log(JSON.stringify(modelsError, null, 2));
   console.log(JSON.stringify(tagsError, null, 3));
-  console.log(tags, models);
 
   useEffect(() => {
     Animated.parallel([
@@ -177,7 +178,7 @@ const TextTransformationScreen: FC = () => {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-background-DEFAULT">
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="white" />
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -187,14 +188,24 @@ const TextTransformationScreen: FC = () => {
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }],
           }}
-          className="flex-row items-center justify-between p-6 bg-background-DEFAULT"
+          className="flex-row items-center justify-between p-6 bg-white"
         >
           <TouchableOpacity className="w-10 h-10 rounded-full bg-background-secondary items-center justify-center">
             <Ionicons name="arrow-back" size={20} color="#374151" />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-text-primary">Transform</Text>
-          <TouchableOpacity className="w-10 h-10 rounded-full bg-background-secondary items-center justify-center">
-            <Ionicons name="ellipsis-horizontal" size={20} color="#374151" />
+          <TouchableOpacity
+            onPress={() => router.push("/profile")}
+            className="w-10 h-10 rounded-full bg-background-secondary items-center justify-center overflow-hidden"
+          >
+            {user?.imageUrl ? (
+              <Image
+                source={{ uri: user.imageUrl }}
+                className="w-full h-full rounded-full"
+              />
+            ) : (
+              <Ionicons name="person" size={20} color="#374151" />
+            )}
           </TouchableOpacity>
         </Animated.View>
 
@@ -211,7 +222,7 @@ const TextTransformationScreen: FC = () => {
           </Text>
           <View className="bg-background-secondary rounded-2xl p-4 border border-border-light">
             <TextInput
-              className="text-base text-text-primary min-h-32"
+              className="text-base text-text-primary min-h-32 max-h-[500px]"
               placeholder="Type or paste your text here..."
               placeholderTextColor="#9ca3af"
               multiline
@@ -219,6 +230,7 @@ const TextTransformationScreen: FC = () => {
               onChangeText={setInputText}
               textAlignVertical="top"
               style={{ fontSize: 16, lineHeight: 22 }}
+              maxLength={7000}
             />
           </View>
           <Text className="text-xs text-text-tertiary mt-2 text-right">
@@ -468,8 +480,6 @@ const TextTransformationScreen: FC = () => {
             />
           )}
         </Animated.View>
-
-        <Link href="/(auth)/auth">Hello</Link>
       </ScrollView>
     </SafeAreaView>
   );

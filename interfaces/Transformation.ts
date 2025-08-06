@@ -2,6 +2,7 @@ export interface TagButtonProps {
   tag: string;
   isSelected: boolean;
   onPress: (type: string) => void;
+  size?: "small" | "large";
 }
 
 export interface Transformation {

@@ -1,53 +1,8 @@
+import SettingsItem from "@/components/ui/SettingsItem";
 import { useClerk } from "@clerk/clerk-expo";
-import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
-} from "react-native";
-
-// A reusable component for each setting item
-const SettingsItem = ({
-  icon,
-  label,
-  onPress,
-  isDestructive = false,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-  isDestructive?: boolean;
-}) => (
-  <TouchableOpacity
-    onPress={onPress}
-    className="flex-row items-center bg-background-secondary p-4 rounded-2xl mb-3"
-  >
-    <Ionicons
-      name={icon}
-      size={22}
-      color={isDestructive ? "#ef4444" : "#6b7280"}
-    />
-    <Text
-      className={`text-base ml-4 font-medium ${
-        isDestructive ? "text-red-500" : "text-text-primary"
-      }`}
-    >
-      {label}
-    </Text>
-    {!isDestructive && (
-      <Ionicons
-        name="chevron-forward"
-        size={22}
-        color="#6b7280"
-        style={{ marginLeft: "auto" }}
-      />
-    )}
-  </TouchableOpacity>
-);
+import { SafeAreaView, ScrollView, Text, View } from "react-native";
 
 const SettingsScreen = () => {
   const { signOut } = useClerk();
@@ -64,9 +19,9 @@ const SettingsScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background-DEFAULT">
-      <ScrollView className="p-6 pt-0">
+      <ScrollView className="p-6 ">
         {/* Header */}
-        <View className="pt-6 pb-8">
+        <View className="pt-10 pb-5   w-full justify-center items-center flex  ">
           <Text className="text-3xl font-bold text-text-primary">Settings</Text>
         </View>
 
@@ -75,7 +30,11 @@ const SettingsScreen = () => {
           <Text className="text-sm font-semibold text-text-secondary uppercase mb-3 px-2">
             Account
           </Text>
-          <SettingsItem icon="person-outline" label="Profile" onPress={() => {}} />
+          <SettingsItem
+            icon="person-outline"
+            label="Profile"
+            onPress={() => {}}
+          />
           <SettingsItem
             icon="notifications-outline"
             label="Notifications"
@@ -98,7 +57,7 @@ const SettingsScreen = () => {
             label="About"
             onPress={() => {}}
           />
-           <SettingsItem
+          <SettingsItem
             icon="shield-checkmark-outline"
             label="Privacy & Security"
             onPress={() => {}}

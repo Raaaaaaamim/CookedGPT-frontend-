@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+import { RecoilRoot } from "recoil";
 import "../global.css"; // Import global CSS for NativeWind
 
 export default function RootLayout() {
@@ -17,19 +19,22 @@ export default function RootLayout() {
   const queryClient = new QueryClient();
   return (
     <QueryClientProvider client={queryClient}>
-      <ClerkProvider tokenCache={tokenCache}>
-        <SafeAreaProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
+      <RecoilRoot>
+        <ClerkProvider tokenCache={tokenCache}>
+          <SafeAreaProvider>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
 
-            <Stack.Screen name="(auth)/auth" />
-          </Stack>
-        </SafeAreaProvider>
-      </ClerkProvider>
+              <Stack.Screen name="(auth)/auth" />
+            </Stack>
+          </SafeAreaProvider>
+        </ClerkProvider>
+      </RecoilRoot>
+      <Toast />
     </QueryClientProvider>
   );
 }
