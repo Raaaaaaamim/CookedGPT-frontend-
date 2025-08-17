@@ -1,11 +1,33 @@
 import { formatTimestamp } from "@/features/utils";
 import { HistoryItemProps } from "@/interfaces/history";
-import { Ionicons } from "@expo/vector-icons";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useState } from "react";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import ExpandableSection from "./ExpandableSection";
 
 const HistoryItem: React.FC<HistoryItemProps> = ({ item }) => {
   const handleReuse = () => {};
+
+  const [isVisible, setisVisible] = useState<boolean>(true);
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete History",
+      `Are you sure you want to delete this history?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+
+          style: "destructive",
+          onPress: () => {
+            setisVisible(false);
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View className="mb-6">
       <View
@@ -80,8 +102,13 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ item }) => {
               <TouchableOpacity
                 onPress={() => handleReuse()}
                 activeOpacity={0.7}
+                onPressIn={handleDelete}
               >
-                <Ionicons name="refresh-outline" size={20} color="#6b7280" />
+                <MaterialIcons
+                  name="delete-outline"
+                  size={22}
+                  color="#0f172b"
+                />
               </TouchableOpacity>
             </View>
           </View>

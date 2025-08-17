@@ -42,9 +42,30 @@ const ApiKeys = () => {
   const [provider, setProvider] = useState<"OPENAI" | "GEMINI" | "OPENROUTER">(
     "GEMINI"
   );
-  function isValidApiKey(apiKey: string) {
-    const apiKeyPattern = /^[A-Za-z0-9\-_]{32,64}$/;
-    return apiKeyPattern.test(apiKey);
+  function isValidApiKey(apiKey: string, provider?: string) {
+    if (!apiKey || typeof apiKey !== "string") {
+      return false;
+    }
+
+    apiKey = apiKey.trim();
+
+    switch (provider) {
+      case "OPENAI":
+        return /^sk-[A-Za-z0-9]{48}$/.test(apiKey);
+
+      case "OPENROUTER":
+        return /^sk-or-v1-[A-Za-z0-9\-_./:=+]{10,}$/.test(apiKey);
+
+      case "GEMINI":
+        return /^[A-Za-z0-9\-_]{20,50}$/.test(apiKey);
+
+      default:
+        return (
+          apiKey.length >= 20 &&
+          apiKey.length <= 200 &&
+          /^[A-Za-z0-9\-_./:=+]+$/.test(apiKey)
+        );
+    }
   }
 
   const {
@@ -131,18 +152,56 @@ const ApiKeys = () => {
       queryClient.invalidateQueries({ queryKey: ["apiKeys"] });
     },
   });
-  const { mutate: updateKey } = useMutation({
+
+  const { mutate: updateKey, isPending: isUpdatingKey } = useMutation({
     mutationKey: ["apiKey", "update"],
     mutationFn: async ({ keyId, key }: { keyId: string; key: string }) => {
-      const res = await axios.put(`/api-key/update/`, {
-        apiKey: key,
-        id: keyId,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const res = await axios.put(
+        `/api-key/update`,
+        {
+          apiKey: key,
+          id: keyId,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       return res.data;
+    },
+    onMutate: ({ keyId, key }) => {
+      queryClient.cancelQueries({ queryKey: ["apiKeys"] });
+      const previousKeys = queryClient.getQueryData<ApiKey[]>(["apiKeys"]);
+
+      queryClient.setQueryData(["apiKeys"], (old: ApiKey[]) => {
+        return old.map((apiKey) =>
+          apiKey.id === keyId
+            ? { ...apiKey, apiKey: key, updatedAt: new Date().toISOString() }
+            : apiKey
+        );
+      });
+
+      return { previousKeys };
+    },
+    onError: (err: any, _, context) => {
+      queryClient.setQueryData(["apiKeys"], context?.previousKeys);
+      Toast.show({
+        type: "error",
+        text1: "Update failed",
+        text2: err.response?.data?.error || "Failed to update API key",
+      });
+      console.log(JSON.stringify(err, null, 2));
+    },
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Key updated successfully",
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["apiKeys"] });
     },
   });
 
@@ -187,6 +246,16 @@ const ApiKeys = () => {
   };
 
   const handleSave = (keyId: string) => {
+    if (!isValidApiKey(tempKey, provider)) {
+      Toast.show({
+        type: "error",
+        text1: "Invalid API key",
+        text2: "Please enter a valid API key",
+      });
+      return;
+    }
+
+    updateKey({ keyId, key: tempKey });
     setEditingKey(null);
     setTempKey("");
   };
@@ -200,7 +269,7 @@ const ApiKeys = () => {
     if (isAddingKey) {
       return;
     }
-    if (!isValidApiKey(tempKey)) {
+    if (!isValidApiKey(tempKey, provider)) {
       Toast.show({
         type: "error",
         text1: "Invalid API key",
@@ -217,6 +286,8 @@ const ApiKeys = () => {
     setProvider(provider);
   };
   const handleKeyChange = (key: string) => {
+    console.log(key, "key");
+
     setTempKey(key);
   };
   const handleDelete = (keyId: string, keyName: string) => {
@@ -349,7 +420,6 @@ const ApiKeys = () => {
                     <TextInput
                       className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
                       placeholder={`Enter your ${apiKey.type} API key`}
-                      value={tempKey}
                       onChangeText={setTempKey}
                       secureTextEntry
                       autoFocus
@@ -358,14 +428,20 @@ const ApiKeys = () => {
                       <TouchableOpacity
                         onPress={() => handleSave(apiKey.id)}
                         className="flex-1 bg-black py-2 rounded-lg active:bg-gray-800"
+                        disabled={isUpdatingKey}
                       >
-                        <Text className="text-white text-center font-medium">
-                          Save
-                        </Text>
+                        {isUpdatingKey ? (
+                          <ActivityIndicator size="small" color="#ffffff" />
+                        ) : (
+                          <Text className="text-white text-center font-medium">
+                            Save
+                          </Text>
+                        )}
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={handleCancel}
                         className="flex-1 border border-gray-300 py-2 rounded-lg active:bg-gray-50"
+                        disabled={isUpdatingKey}
                       >
                         <Text className="text-black text-center font-medium">
                           Cancel
@@ -430,7 +506,7 @@ const ApiKeys = () => {
                       value={tempKey}
                       onChangeText={handleKeyChange}
                       secureTextEntry
-                      maxLength={64}
+                      maxLength={400}
                       className="border mb-4 mt-4 h-16 border-gray-300 rounded-lg px-3 py-2 text-sm"
                     ></TextInput>
                   </>
@@ -462,10 +538,7 @@ const ApiKeys = () => {
 
                   {next ? (
                     isAddingKey ? (
-                      <TouchableOpacity
-                        onPress={handleAddKey}
-                        className=" bg-background-dark  rounded-full w-20  h-10  items-center justify-center "
-                      >
+                      <TouchableOpacity className=" bg-background-dark  rounded-full w-20  h-10  items-center justify-center ">
                         <ActivityIndicator size="small" color="#FFFFFF" />
                       </TouchableOpacity>
                     ) : (
