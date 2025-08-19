@@ -43,7 +43,6 @@ const ProfileScreen = () => {
     enabled: true,
   });
 
-  console.log(JSON.stringify(error, null, 2));
 
   const stats = {
     savedItems: 34,

@@ -3,6 +3,7 @@ import { ApiKey } from "@/interfaces/apiKeys";
 import { useAuth } from "@clerk/clerk-expo";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import axios from "axios";
 import { format } from "date-fns";
 import { router } from "expo-router";
@@ -192,7 +193,6 @@ const ApiKeys = () => {
         text1: "Update failed",
         text2: err.response?.data?.error || "Failed to update API key",
       });
-      console.log(JSON.stringify(err, null, 2));
     },
     onSuccess: () => {
       Toast.show({

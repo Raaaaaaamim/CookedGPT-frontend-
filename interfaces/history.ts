@@ -7,4 +7,5 @@ export interface TagButtonProps {
 }
 export interface HistoryItemProps {
   item: Transformation;
+  selectedTag: string | undefined;
 }

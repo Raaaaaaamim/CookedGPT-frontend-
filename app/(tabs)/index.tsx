@@ -88,7 +88,6 @@ const TextTransformationScreen: FC = () => {
       });
     },
   });
-  console.log(JSON.stringify(transformationMutation.error, null, 2));
 
   const {
     data: tags,
@@ -143,7 +142,6 @@ const TextTransformationScreen: FC = () => {
   const models = data?.pages.flat() || [];
 
   //console.log(JSON.stringify(modelsError, null, 2));
-  console.log(JSON.stringify(tagsError, null, 3));
 
   useEffect(() => {
     Animated.parallel([

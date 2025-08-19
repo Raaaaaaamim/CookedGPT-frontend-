@@ -23,7 +23,9 @@ const RenderTransformations = ({
   return (
     <FlatList
       data={allItems}
-      renderItem={({ item }) => <HistoryItem item={item} />}
+      renderItem={({ item }) => (
+        <HistoryItem selectedTag={selectedTag} item={item} />
+      )}
       keyExtractor={(item) => item.id}
       className="flex-1 px-6"
       showsVerticalScrollIndicator={false}

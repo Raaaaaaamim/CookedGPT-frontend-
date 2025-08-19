@@ -16,3 +16,11 @@ export interface Transformation {
   updatedAt: Date;
   tags: string[];
 }
+export interface TransformationsRes {
+  transformations: Transformation[];
+  hasNextPage: boolean;
+  foundTransformations: number;
+  totalTransformations: number;
+  page: number;
+  limit: number;
+}

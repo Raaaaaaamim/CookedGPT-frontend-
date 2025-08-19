@@ -14,11 +14,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 const HistoryScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTag, setSelectedTag] = useState<string>("ALL");
-
   const [token, setToken] = useState<string | null>(null);
 
   const { getToken } = useAuth();
@@ -111,8 +109,6 @@ const HistoryScreen: React.FC = () => {
     },
     enabled: true,
   });
-
-  console.log(JSON.stringify(error, null, 2));
 
   useEffect(() => {
     refetch();
