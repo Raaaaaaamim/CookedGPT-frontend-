@@ -88,6 +88,11 @@ module.exports = {
         "2xl": "1rem", // 16px
       },
     },
+    fontFamily: {
+      Poppins: ["Poppins_400Regular", "sans-serif"],
+      PoppinsSemi: ["Poppins_600SemiBold", "sans-serif"],
+      PoppinsBold: ["Poppins_700Bold", "sans-serif"],
+    },
   },
   plugins: [],
 };

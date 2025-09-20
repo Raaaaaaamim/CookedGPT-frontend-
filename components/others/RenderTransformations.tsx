@@ -11,8 +11,15 @@ const RenderTransformations = ({
   fetchNextPage,
   searchQuery,
   selectedTag,
+  isRefetching,
 }: RenderTransformationsProps) => {
   if (isLoading && !isFetchingNextPage) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color="#888" />
+      </View>
+    );
+  } else if (isRefetching) {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" color="#888" />

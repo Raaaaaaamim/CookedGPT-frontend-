@@ -31,6 +31,7 @@ export default function TabsLayout(): React.JSX.Element {
             fontSize: 11,
             fontWeight: "500",
             marginTop: 4,
+            fontFamily: "Poppins_500Medium",
           },
           tabBarIconStyle: {
             marginBottom: -2,
@@ -63,19 +64,7 @@ export default function TabsLayout(): React.JSX.Element {
             ),
           }}
         />
-        <Tabs.Screen
-          name="settings"
-          options={{
-            title: "Settings",
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
-                name={focused ? "settings" : "settings-outline"}
-                size={focused ? 26 : 24}
-                color={color}
-              />
-            ),
-          }}
-        />
+
         <Tabs.Screen
           name="profile"
           options={{

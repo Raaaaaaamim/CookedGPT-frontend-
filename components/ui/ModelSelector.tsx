@@ -21,7 +21,7 @@ const ModelSelector: FC<ModelSelectorProps> = ({
     <View className="flex-row items-center justify-between">
       <View className="">
         <Text
-          className={`font-bold text-base mb-1 ${
+          className={`font-PoppinsSemi text-base mb-1 ${
             isSelected ? "text-text-primary" : "text-text-primary"
           }`}
         >
@@ -31,12 +31,12 @@ const ModelSelector: FC<ModelSelectorProps> = ({
         {/* Redesigned speed and accuracy section */}
         <View className="flex-row gap-4 mt-2">
           <View className="bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200">
-            <Text className="text-xs text-gray-700 font-medium">
+            <Text className="text-xs text-gray-700 font-Poppins">
               Speed: {model.speed}s
             </Text>
           </View>
           <View className="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-            <Text className="text-xs text-slate-700 font-medium">
+            <Text className="text-xs text-slate-700 font-Poppins">
               Accuracy: {model.accuracy}%
             </Text>
           </View>

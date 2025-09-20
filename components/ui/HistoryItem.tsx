@@ -167,11 +167,7 @@ const HistoryItem: React.FC<HistoryItemProps> = ({ item, selectedTag }) => {
                 onPress={() => handleDelete()}
                 activeOpacity={0.7}
               >
-                <MaterialIcons
-                  name="delete-outline"
-                  size={22}
-                  color="#0f172b"
-                />
+                <MaterialIcons name="delete" size={22} color="#0f172b" />
               </TouchableOpacity>
             </View>
           </View>

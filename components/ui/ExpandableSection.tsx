@@ -38,7 +38,7 @@ const ExpandableSection: React.FC<{
     >
       <View className="flex-row justify-between items-center mb-2">
         <Text
-          className={`text-xs font-bold uppercase tracking-wider ${headerColor}`}
+          className={`text-xs font-PoppinsSemi uppercase tracking-wider ${headerColor}`}
         >
           {label}
         </Text>
@@ -47,7 +47,7 @@ const ExpandableSection: React.FC<{
         </TouchableOpacity>
       </View>
       <Text
-        className={`text-sm leading-5 mb-2 ${textColor}`}
+        className={`text-sm font-Poppins  leading-5 mb-2 ${textColor}`}
         numberOfLines={
           isLongText && !isExpanded ? (isOutput ? 4 : 3) : undefined
         }
@@ -55,13 +55,13 @@ const ExpandableSection: React.FC<{
         {content}
       </Text>
       <View className="flex-row justify-between items-center mt-1">
-        <Text className={`text-xs ${headerColor}`}>
+        <Text className={`text-xs font-Poppins ${headerColor}`}>
           {characterCount} characters
         </Text>
         {isLongText && (
           <TouchableOpacity onPress={toggleExpand} activeOpacity={0.7}>
             <Text
-              className={`text-xs font-semibold ${
+              className={`text-xs font-PoppinsSemi ${
                 isOutput ? "text-border-dark" : "text-text-primary"
               }`}
             >

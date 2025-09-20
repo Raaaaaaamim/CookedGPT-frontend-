@@ -18,7 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 const ProfileScreen = () => {
   const { user } = useUser();
   const { signOut } = useAuth();
@@ -42,14 +41,11 @@ const ProfileScreen = () => {
     },
     enabled: true,
   });
-
-
   const stats = {
     savedItems: 34,
     daysActive: 45,
     accuracy: 89,
   };
-
   const menuItems = [
     {
       icon: <MaterialCommunityIcons name="history" size={22} color="black" />,
@@ -63,9 +59,15 @@ const ProfileScreen = () => {
       screen: "settings",
     },
     {
-      icon: <Ionicons name="help-circle-outline" size={22} color="#000000" />,
-      title: "Help & Support",
-      screen: "support",
+      icon: (
+        <MaterialCommunityIcons
+          name="tag-plus-outline"
+          size={20}
+          color="black"
+        />
+      ),
+      title: "Custom Tags",
+      screen: "custom-tags",
     },
     {
       icon: <AntDesign name="key" size={20} color="black" />,
@@ -73,11 +75,9 @@ const ProfileScreen = () => {
       screen: "api-keys",
     },
   ];
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
@@ -91,7 +91,9 @@ const ProfileScreen = () => {
           >
             <Ionicons name="arrow-back" size={24} color="#000000" />
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-text-primary">Profile</Text>
+          <Text className="text-xl font-PoppinsSemi text-text-primary">
+            Profile
+          </Text>
           <TouchableOpacity
             onPress={() => router.push("/settings")}
             className="p-2 rounded-full active:bg-gray-100"
@@ -99,7 +101,6 @@ const ProfileScreen = () => {
             <Ionicons name="ellipsis-horizontal" size={24} color="#000000" />
           </TouchableOpacity>
         </View>
-
         {/* Profile Card - Rounded Design */}
         <View className="px-4 mb-6">
           <View className="bg-gray-50 rounded-3xl p-6">
@@ -113,27 +114,24 @@ const ProfileScreen = () => {
                   />
                 ) : (
                   <View className="w-full h-full rounded-full bg-gray-200 items-center justify-center">
-                    <Text className="text-3xl font-bold text-black">
+                    <Text className="text-3xl font-PoppinsSemi text-black">
                       {user?.firstName?.[0]?.toUpperCase() || "U"}
                     </Text>
                   </View>
                 )}
               </View>
-
               {/* Name and Basic Info */}
-              <Text className="text-2xl font-bold text-black mb-1">
+              <Text className="text-2xl font-PoppinsSemi text-black mb-1">
                 {user?.firstName} {user?.lastName}
               </Text>
-
               {isLoading && !isError ? (
-                <Text>loading...</Text>
+                <Text className="font-Poppins">loading...</Text>
               ) : (
-                <Text className="text-sm text-gray-600 mb-2">
+                <Text className="text-sm font-Poppins text-gray-600 mb-2">
                   @{userData?.user?.fullName?.toLowerCase().split(" ").join("")}
                 </Text>
               )}
-
-              <Text className="text-xs text-gray-500">
+              <Text className="text-xs font-Poppins text-gray-500">
                 Member since{" "}
                 {user?.createdAt
                   ? new Date(user.createdAt).toLocaleDateString("en-US", {
@@ -143,36 +141,39 @@ const ProfileScreen = () => {
                   : "N/A"}
               </Text>
             </View>
-
             {/* Stats Row */}
             <View className="flex-row justify-around py-4 border-t border-gray-200">
               <View className="items-center">
                 {isLoading && !isError ? (
                   <ActivityIndicator size="small" color="#000000" />
                 ) : (
-                  <Text className="text-xl font-bold text-black">
+                  <Text className="text-xl font-PoppinsSemi text-black">
                     {userData?.totalTransformations}
                   </Text>
                 )}
-                <Text className="text-xs text-gray-500">Transformations</Text>
+                <Text className="text-xs font-Poppins text-gray-500">
+                  Transformations
+                </Text>
               </View>
               <View className="w-px bg-gray-200" />
               <View className="items-center">
                 {isLoading && !isError ? (
                   <ActivityIndicator size="small" color="#000000" />
                 ) : (
-                  <Text className="text-xl font-bold text-black">
+                  <Text className="text-xl font-PoppinsSemi text-black">
                     {Number(userData?.totalTransformations) * 63}
                   </Text>
                 )}
-                <Text className="text-xs text-gray-500">Score</Text>
+                <Text className="text-xs font-Poppins text-gray-500">
+                  Score
+                </Text>
               </View>
               <View className="w-px bg-gray-200" />
               <View className="items-center">
                 {isLoading && !isError ? (
                   <ActivityIndicator size="small" color="#000000" />
                 ) : (
-                  <Text className="text-xl font-bold text-black">
+                  <Text className="text-xl font-PoppinsSemi text-black">
                     {Math.floor(
                       (new Date().getTime() -
                         new Date(userData?.user.createdAt).getTime()) /
@@ -180,49 +181,54 @@ const ProfileScreen = () => {
                     )}
                   </Text>
                 )}
-                <Text className="text-xs text-gray-500">Days Active</Text>
+                <Text className="text-xs font-Poppins text-gray-500">
+                  Days Active
+                </Text>
               </View>
             </View>
           </View>
         </View>
-
         {/* User Details Section - Rounded Cards */}
         <View className="px-4 mb-6">
-          <Text className="text-sm font-semibold text-gray-600 uppercase mb-3 px-2">
+          <Text className="text-sm font-PoppinsSemi text-gray-600 uppercase mb-3 px-2">
             Account Details
           </Text>
-
           <View className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
             <View className="p-4 border-b border-gray-100">
-              <Text className="text-xs text-gray-500 mb-1">Email Address</Text>
-              <Text className="text-sm font-medium text-black">
+              <Text className="text-xs font-Poppins text-gray-500 mb-1">
+                Email Address
+              </Text>
+              <Text className="text-sm font-PoppinsSemi text-black">
                 {user?.primaryEmailAddress?.emailAddress || "No email provided"}
               </Text>
             </View>
-
             <View className="p-4 border-b border-gray-100">
-              <Text className="text-xs text-gray-500 mb-1">User ID</Text>
-              <Text className="text-sm font-mono text-black">
+              <Text className="text-xs font-Poppins text-gray-500 mb-1">
+                User ID
+              </Text>
+              <Text className="text-sm font-Poppins text-black">
                 {user?.id?.substring(0, 8)}...
                 {user?.id?.substring(user.id.length - 4)}
               </Text>
             </View>
-
             <View className="p-4 border-b border-gray-100">
-              <Text className="text-xs text-gray-500 mb-1">Account Status</Text>
+              <Text className="text-xs font-Poppins text-gray-500 mb-1">
+                Account Status
+              </Text>
               <View className="flex-row items-center">
                 <View className="w-2 h-2 bg-black rounded-full mr-2" />
-                <Text className="text-sm font-medium text-black">
+                <Text className="text-sm font-PoppinsSemi text-black">
                   {userData?.user?.clerkId === user?.id
                     ? "Active "
                     : "Inactive"}
                 </Text>
               </View>
             </View>
-
             <View className="p-4">
-              <Text className="text-xs text-gray-500 mb-1">Last Updated</Text>
-              <Text className="text-sm font-medium text-black">
+              <Text className="text-xs font-Poppins text-gray-500 mb-1">
+                Last Updated
+              </Text>
+              <Text className="text-sm font-PoppinsSemi text-black">
                 {new Date(userData?.user?.updatedAt).toLocaleDateString(
                   "en-US",
                   {
@@ -236,14 +242,12 @@ const ProfileScreen = () => {
             </View>
           </View>
         </View>
-
         {/* Activity Section - Rounded Cards */}
         <View className="px-4 mb-6">
-          <Text className="text-sm font-semibold text-gray-600 uppercase mb-3 px-2">
+          <Text className="text-sm font-PoppinsSemi text-gray-600 uppercase mb-3 px-2">
             Activity
           </Text>
-
-          <View className=" flex  gap-3 ">
+          <View className=" flex  gap-3 ">
             {menuItems.map((item, index) => (
               <TouchableOpacity
                 key={index}
@@ -254,11 +258,11 @@ const ProfileScreen = () => {
                   {item.icon}
                 </View>
                 <View className="flex-1">
-                  <Text className="text-base font-medium text-black">
+                  <Text className="text-base font-PoppinsSemi text-black">
                     {item.title}
                   </Text>
                   {item.count && (
-                    <Text className="text-xs text-gray-500">
+                    <Text className="text-xs font-Poppins text-gray-500">
                       {item.count}{" "}
                       {item.title === "Activity" ? "transformations" : "items"}
                     </Text>
@@ -269,7 +273,6 @@ const ProfileScreen = () => {
             ))}
           </View>
         </View>
-
         {/* Sign Out Section */}
         <View className="px-4 mb-6">
           <TouchableOpacity
@@ -277,15 +280,14 @@ const ProfileScreen = () => {
             className="flex-row items-center justify-center py-4 bg-gray-50 rounded-2xl border border-gray-200 active:bg-gray-100"
           >
             <Ionicons name="log-out-outline" size={20} color="#000000" />
-            <Text className="text-base font-medium text-black ml-2">
+            <Text className="text-base font-PoppinsSemi text-black ml-2">
               Sign Out
             </Text>
           </TouchableOpacity>
         </View>
-
         {/* Footer */}
         <View className="px-4 pb-6">
-          <Text className="text-center text-xs text-gray-400">
+          <Text className="text-center text-xs font-Poppins text-gray-400">
             CookedGPT v1.0.0 • Built with ❤️
           </Text>
         </View>
@@ -293,5 +295,4 @@ const ProfileScreen = () => {
     </SafeAreaView>
   );
 };
-
 export default ProfileScreen;

@@ -24,7 +24,7 @@ const TagButton: React.FC<TagButtonProps> = ({
       }}
     >
       <Text
-        className={`text-center font-bold text-sm ${
+        className={`text-center font-PoppinsSemi text-sm ${
           isSelected ? "text-text-white" : "text-text-secondary"
         }`}
       >

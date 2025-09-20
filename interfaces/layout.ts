@@ -6,4 +6,5 @@ export interface RenderTransformationsProps {
   fetchNextPage: () => void;
   searchQuery?: string;
   selectedTag?: string;
+  isRefetching?: boolean;
 }

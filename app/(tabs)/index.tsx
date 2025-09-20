@@ -22,8 +22,7 @@ import {
 import Toast from "react-native-toast-message";
 import { Model, MODEL_TYPE, PERFORMANCE } from "../../interfaces/Model";
 
-axios.defaults.baseURL = "http://192.168.1.111:4000/api/v1";
-
+axios.defaults.baseURL = "http://192.168.0.103:4000/api/v1";
 const TextTransformationScreen: FC = () => {
   const [inputText, setInputText] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>(["SAVAGE"]);
@@ -215,7 +214,7 @@ const TextTransformationScreen: FC = () => {
           }}
           className="mx-6 mb-8"
         >
-          <Text className="text-lg font-bold text-text-primary mb-4">
+          <Text className="text-lg font-PoppinsSemi    text-text-primary mb-4">
             Input Text
           </Text>
           <View className="bg-background-secondary rounded-2xl p-4 border border-border-light">
@@ -244,7 +243,7 @@ const TextTransformationScreen: FC = () => {
           }}
           className="mx-6 mb-8"
         >
-          <Text className="text-lg font-bold text-text-primary mb-4">
+          <Text className="text-lg font-PoppinsSemi  text-text-primary mb-4">
             Style
           </Text>
           <ScrollView
@@ -319,7 +318,7 @@ const TextTransformationScreen: FC = () => {
           }}
           className="mx-6 mb-8"
         >
-          <Text className="text-lg font-bold text-text-primary mb-4">
+          <Text className="text-lg font-PoppinsSemi text-text-primary mb-4">
             AI Model
           </Text>
 
@@ -372,7 +371,7 @@ const TextTransformationScreen: FC = () => {
                     onPress={() => setSeeMore(false)}
                     className="flex-row items-center justify-center gap-2"
                   >
-                    <Text className="text-text-primary font-bold">
+                    <Text className="text-text-primary font-PoppinsSemi">
                       Collapse
                     </Text>
                     <Feather
@@ -433,7 +432,7 @@ const TextTransformationScreen: FC = () => {
                 </Animated.View>
               )}
               <Text
-                className={`font-bold text-base ${
+                className={`font-PoppinsSemi text-base ${
                   transformationMutation.isPending || !inputText.trim()
                     ? "text-text-tertiary"
                     : "text-text-white"
@@ -466,7 +465,7 @@ const TextTransformationScreen: FC = () => {
           }}
           className="mx-6  mb-8"
         >
-          <Text className="text-lg font-bold text-text-primary mb-4">
+          <Text className="text-lg font-PoppinsSemi text-text-primary mb-4">
             Output
           </Text>
           {transformationMutation.data ? (

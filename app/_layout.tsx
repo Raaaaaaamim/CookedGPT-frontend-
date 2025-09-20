@@ -1,19 +1,35 @@
 import { toastConfig } from "@/components/ui/ToastConfig";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
+import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { RecoilRoot } from "recoil";
 import "../global.css"; // Import global CSS for NativeWind
-
 export default function RootLayout() {
-  const [loaded] = useFonts({
-    Poppins_Regular: require("../assets/fonts/Poppins-Regular.ttf"),
+  const [loaded, error] = useFonts({
+    Poppins_600SemiBold,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_700Bold,
   });
-  if (!loaded) {
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
     return null;
   }
 

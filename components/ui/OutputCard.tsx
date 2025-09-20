@@ -17,7 +17,7 @@ const OutputCard = ({ transformation, isPending }: Props) => {
         <View className="w-12 h-12 bg-gray-800 rounded-full items-center justify-center mb-3">
           <Ionicons name="document-text-outline" size={24} color="#6b7280" />
         </View>
-        <Text className="text-gray-400 text-sm text-center">
+        <Text className="text-gray-400 font-Poppins text-sm text-center">
           Your transformed text will appear here
         </Text>
       </View>
@@ -33,7 +33,7 @@ const OutputCard = ({ transformation, isPending }: Props) => {
 
       {/* Content */}
       <View className="pr-8 mb-4">
-        <Text className="text-white text-base leading-6">
+        <Text className="text-white font-Poppins text-base leading-6">
           {transformation.content}
         </Text>
       </View>
@@ -41,7 +41,7 @@ const OutputCard = ({ transformation, isPending }: Props) => {
       {/* Footer */}
       <View className="flex-row items-center justify-between pt-3 border-t border-gray-800">
         <Text
-          className="text-gray-400 text-xs w-32 mr-2  flex-1 "
+          className="text-gray-400 text-xs w-32 mr-2 font-Poppins  flex-1 "
           numberOfLines={1}
         >
           {transformation.tags[0]} • {transformation.modelName}
@@ -52,7 +52,7 @@ const OutputCard = ({ transformation, isPending }: Props) => {
           activeOpacity={0.8}
         >
           <Ionicons name="copy-outline" size={14} color="#e5e7eb" />
-          <Text className="text-gray-200 text-xs font-medium">Copy</Text>
+          <Text className="text-gray-200 text-xs font-Poppins">Copy</Text>
         </TouchableOpacity>
       </View>
     </View>
